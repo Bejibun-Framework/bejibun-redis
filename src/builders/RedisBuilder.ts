@@ -11,6 +11,25 @@ export default class RedisBuilder {
     private static clients: Record<string, Bun.RedisClient> = {};
     private static emitter = new EventEmitter();
 
+    public static setClient(cfg: RedisConfig): Record<string, Function> {
+        const connectionName = "override";
+
+        this.ensureExitHooks();
+
+        if (isEmpty(this.clients[connectionName])) {
+            this.clients[connectionName] = this.createClient(connectionName, cfg);
+        }
+
+        return {
+            del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName),
+            get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName),
+            pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, connectionName),
+            publish: (channel: string, message: any) => this.publish(channel, message, connectionName),
+            set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, connectionName),
+            subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) => this.subscribe(channel, listener, connectionName),
+        };
+    }
+
     public static connection(name: string): Record<string, Function> {
         return {
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, name),
@@ -54,48 +73,81 @@ export default class RedisBuilder {
     }
 
     public static async get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any> {
-        const response = await this.getClient(connection).get(key);
+        try {
+            const response = await this.getClient(connection).get(key);
 
-        return this.deserialize(response);
+            return this.deserialize(response);
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to get value.").trace(error);
+
+            return null;
+        }
     }
 
     public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string): Promise<number | "OK"> {
-        const client = this.getClient(connection);
-        const serialized = this.serialize(value);
+        try {
+            const client = this.getClient(connection);
+            const serialized = this.serialize(value);
 
-        const data = await client.set(key, serialized);
+            const data = await client.set(key, serialized);
 
-        if (isNotEmpty(ttl)) return await client.expire(key, ttl as number);
+            if (isNotEmpty(ttl)) return await client.expire(key, ttl as number);
 
-        return data;
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to set value.").trace(error);
+
+            return 0;
+        }
     }
 
     public static async del(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number> {
-        return await this.getClient(connection).del(key);
+        try {
+            return await this.getClient(connection).del(key);
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to delete key.").trace(error);
+
+            return 0;
+        }
     }
 
     public static async publish(channel: string, message: any, connection?: string): Promise<number> {
-        const serialized = this.serialize(message);
+        try {
+            const serialized = this.serialize(message);
 
-        return await this.getClient(connection).publish(channel, serialized);
+            return await this.getClient(connection).publish(channel, serialized);
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to publish channel.").trace(error);
+
+            return 0;
+        }
     }
 
     public static async subscribe(channel: string, listener: Bun.RedisClient.StringPubSubListener, connection?: string): Promise<RedisSubscribe> {
-        const cfg = this.getConfig(connection);
-        const client = this.createClient(this.config.default, cfg);
+        const client = this.getClient(connection);
         this.clients[channel] = client;
 
-        await client.subscribe(channel, (message: string, channel: string) => listener(this.deserialize(message), channel));
+        try {
+            await client.subscribe(channel, (message: string, channel: string) => listener(this.deserialize(message), channel));
 
-        Logger.setContext("Redis").info(`Subscribed to "${channel}" channel.`);
+            Logger.setContext("Redis").info(`Subscribed to "${channel}" channel.`);
+        } catch (error: any) {
+            Logger.setContext("Redis").error(`Failed to subscribe "${channel}" channel.`).trace(error);
+        }
 
         const unsubscribe = async () => {
-            await client.unsubscribe(channel);
-            await client.close();
+            try {
+                await client.unsubscribe(channel);
+                await client.close();
 
-            Logger.setContext("Redis").warn(`Unsubscribed from "${channel}" channel.`);
+                Logger.setContext("Redis").warn(`Unsubscribed from "${channel}" channel.`);
 
-            return true;
+                return true;
+            } catch (error: any) {
+                Logger.setContext("Redis").error(`Failed to unsubscribe from "${channel}" channel.`).trace(error);
+
+                return false;
+            }
         };
 
         return {
@@ -225,11 +277,7 @@ export default class RedisBuilder {
         }
     }
 
-    private static ensureExitHooks(): void {
-        this.setupExitHooks();
-    }
-
-    private static setupExitHooks = ((): Function => {
+    private static ensureExitHooks = ((): Function => {
         let initialized = false;
 
         return (): void => {

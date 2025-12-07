@@ -3,6 +3,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.35](https://github.com/crenata/bejibun-redis/compare/v0.1.34...v0.1.35) - 2025-12-07
+
+### 🩹 Fixes
+
+### 📖 Changes
+What's New :
+- Adding `.setClient(cfg: RedisConfig)` to override connection.
+
+By default, [@bejibun/redis](https://github.com/crenata/bejibun-redis) use connection from `config/redis.ts`.
+
+Now, you can override it by using `setClient()`.
+
+#### Upgrade [@bejibun/utils](https://github.com/crenata/bejibun-utils) to [v0.1.24](https://github.com/crenata/bejibun-utils/releases/tag/v0.1.24)
+- Fix empty validation for class
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.34](https://github.com/crenata/bejibun-redis/compare/v0.1.33...v0.1.34) - 2025-11-23
 
 ### 🩹 Fixes

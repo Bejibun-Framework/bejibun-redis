@@ -1,7 +1,8 @@
-import type { RedisPipeline, RedisSubscribe } from "../types/redis";
+import type { RedisConfig, RedisPipeline, RedisSubscribe } from "../types/redis";
 export default class RedisBuilder {
     private static clients;
     private static emitter;
+    static setClient(cfg: RedisConfig): Record<string, Function>;
     static connection(name: string): Record<string, Function>;
     static connect(name?: string): Promise<Bun.RedisClient>;
     static disconnect(name?: string): Promise<void>;
@@ -22,5 +23,4 @@ export default class RedisBuilder {
     private static serialize;
     private static deserialize;
     private static ensureExitHooks;
-    private static setupExitHooks;
 }
