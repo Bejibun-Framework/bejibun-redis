@@ -3,6 +3,22 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.36](https://github.com/crenata/bejibun-redis/compare/v0.1.35...v0.1.36) - 2025-12-11
+
+### 🩹 Fixes
+
+### 📖 Changes
+- Set random connection name for `.setClient()` and disconnect after used then clear the connection lists.
+
+#### Upgrade [@bejibun/utils](https://github.com/crenata/bejibun-utils) to [v0.1.27](https://github.com/crenata/bejibun-utils/releases/tag/v0.1.24)
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.35](https://github.com/crenata/bejibun-redis/compare/v0.1.34...v0.1.35) - 2025-12-07
 
 ### 🩹 Fixes

@@ -74,6 +74,15 @@ export default class TestController extends BaseController {
         await Redis.connection("local").set("connection", "This is using custom connection.");
         const connection = await Redis.connection("local").get("connection");
 
+        await Redis.setClient({
+            host: "127.0.0.1",
+            port: 6379,
+            password: "",
+            database: 0,
+            maxRetries: 10
+        }, "optional-connection-name").set("redis", {hello: "world"});
+        // for publish and subscibe recommended using custom connection name to make sure connection matched
+
         const pipeline = await Redis.pipeline((pipe: RedisPipeline) => {
             pipe.set("redis-pipeline-1", "This is redis pipeline 1");
             pipe.set("redis-pipeline-2", "This is redis pipeline 2");

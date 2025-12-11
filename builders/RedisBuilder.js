@@ -1,6 +1,7 @@
 import App from "@bejibun/app";
 import Logger from "@bejibun/logger";
 import { defineValue, isEmpty, isNotEmpty } from "@bejibun/utils";
+import Str from "@bejibun/utils/facades/Str";
 import { EventEmitter } from "events";
 import fs from "fs";
 import RedisConf from "../config/redis";
@@ -8,18 +9,15 @@ import RedisException from "../exceptions/RedisException";
 export default class RedisBuilder {
     static clients = {};
     static emitter = new EventEmitter();
-    static setClient(cfg) {
-        const connectionName = "override";
-        this.ensureExitHooks();
-        if (isEmpty(this.clients[connectionName])) {
-            this.clients[connectionName] = this.createClient(connectionName, cfg);
-        }
+    static setClient(cfg, name) {
+        const connectionName = defineValue(name, Str.random());
+        this.clients[connectionName] = this.createClient(connectionName, cfg);
         return {
-            del: (key) => this.del(key, connectionName),
-            get: (key) => this.get(key, connectionName),
-            pipeline: (fn) => this.pipeline(fn, connectionName),
+            del: (key) => this.del(key, connectionName, isNotEmpty(name)),
+            get: (key) => this.get(key, connectionName, isNotEmpty(name)),
+            pipeline: (fn) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel, message) => this.publish(channel, message, connectionName),
-            set: (key, value, ttl) => this.set(key, value, ttl, connectionName),
+            set: (key, value, ttl) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
             subscribe: (channel, listener) => this.subscribe(channel, listener, connectionName),
         };
     }
@@ -57,9 +55,11 @@ export default class RedisBuilder {
             this.clients = {};
         }
     }
-    static async get(key, connection) {
+    static async get(key, connection, disconnectAfter) {
         try {
             const response = await this.getClient(connection).get(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
             return this.deserialize(response);
         }
         catch (error) {
@@ -67,13 +67,15 @@ export default class RedisBuilder {
             return null;
         }
     }
-    static async set(key, value, ttl, connection) {
+    static async set(key, value, ttl, connection, disconnectAfter) {
         try {
             const client = this.getClient(connection);
             const serialized = this.serialize(value);
             const data = await client.set(key, serialized);
             if (isNotEmpty(ttl))
                 return await client.expire(key, ttl);
+            if (disconnectAfter)
+                await this.disconnect(connection);
             return data;
         }
         catch (error) {
@@ -81,9 +83,12 @@ export default class RedisBuilder {
             return 0;
         }
     }
-    static async del(key, connection) {
+    static async del(key, connection, disconnectAfter) {
         try {
-            return await this.getClient(connection).del(key);
+            const data = await this.getClient(connection).del(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
         }
         catch (error) {
             Logger.setContext("Redis").error("Failed to delete key.").trace(error);
@@ -127,7 +132,7 @@ export default class RedisBuilder {
             unsubscribe: unsubscribe
         };
     }
-    static async pipeline(fn, connection) {
+    static async pipeline(fn, connection, disconnectAfter) {
         const client = this.getClient(connection);
         const ops = [];
         const pipe = {
@@ -147,6 +152,8 @@ export default class RedisBuilder {
         };
         fn(pipe);
         const results = await Promise.all(ops);
+        if (disconnectAfter)
+            await this.disconnect(connection);
         return results.map((result) => this.deserialize(result));
     }
     static on(event, listener) {

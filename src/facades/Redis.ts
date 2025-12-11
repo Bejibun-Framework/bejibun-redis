@@ -2,8 +2,8 @@ import type {RedisConfig, RedisPipeline, RedisSubscribe} from "@/types/redis";
 import RedisBuilder from "@/builders/RedisBuilder";
 
 export default class Redis {
-    public static setClient(cfg: RedisConfig): Record<string, Function> {
-        return RedisBuilder.setClient(cfg);
+    public static setClient(cfg: RedisConfig, name?: string): Record<string, Function> {
+        return RedisBuilder.setClient(cfg, name);
     }
 
     public static connection(name: string): Record<string, Function> {

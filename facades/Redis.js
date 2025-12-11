@@ -1,7 +1,7 @@
 import RedisBuilder from "../builders/RedisBuilder";
 export default class Redis {
-    static setClient(cfg) {
-        return RedisBuilder.setClient(cfg);
+    static setClient(cfg, name) {
+        return RedisBuilder.setClient(cfg, name);
     }
     static connection(name) {
         return RedisBuilder.connection(name);
