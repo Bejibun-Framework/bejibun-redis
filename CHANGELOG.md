@@ -3,23 +3,23 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [v0.1.36](https://github.com/crenata/bejibun-redis/compare/v0.1.35...v0.1.36) - 2025-12-11
+## [v0.1.36](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.35...v0.1.36) - 2025-12-11
 
 ### 🩹 Fixes
 
 ### 📖 Changes
 - Set random connection name for `.setClient()` and disconnect after used then clear the connection lists.
 
-#### Upgrade [@bejibun/utils](https://github.com/crenata/bejibun-utils) to [v0.1.27](https://github.com/crenata/bejibun-utils/releases/tag/v0.1.24)
+#### Upgrade [@bejibun/utils](https://github.com/Bejibun-Framework/bejibun-utils) to [v0.1.27](https://github.com/Bejibun-Framework/bejibun-utils/releases/tag/v0.1.24)
 
 ### ❤️Contributors
 - Havea Crenata ([@crenata](https://github.com/crenata))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.35](https://github.com/crenata/bejibun-redis/compare/v0.1.34...v0.1.35) - 2025-12-07
+## [v0.1.35](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.34...v0.1.35) - 2025-12-07
 
 ### 🩹 Fixes
 
@@ -27,21 +27,21 @@ All notable changes to this project will be documented in this file.
 What's New :
 - Adding `.setClient(cfg: RedisConfig)` to override connection.
 
-By default, [@bejibun/redis](https://github.com/crenata/bejibun-redis) use connection from `config/redis.ts`.
+By default, [@bejibun/redis](https://github.com/Bejibun-Framework/bejibun-redis) use connection from `config/redis.ts`.
 
 Now, you can override it by using `setClient()`.
 
-#### Upgrade [@bejibun/utils](https://github.com/crenata/bejibun-utils) to [v0.1.24](https://github.com/crenata/bejibun-utils/releases/tag/v0.1.24)
+#### Upgrade [@bejibun/utils](https://github.com/Bejibun-Framework/bejibun-utils) to [v0.1.24](https://github.com/Bejibun-Framework/bejibun-utils/releases/tag/v0.1.24)
 - Fix empty validation for class
 
 ### ❤️Contributors
 - Havea Crenata ([@crenata](https://github.com/crenata))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.34](https://github.com/crenata/bejibun-redis/compare/v0.1.33...v0.1.34) - 2025-11-23
+## [v0.1.34](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.33...v0.1.34) - 2025-11-23
 
 ### 🩹 Fixes
 - Fix redis ttl
@@ -51,11 +51,11 @@ Now, you can override it by using `setClient()`.
 ### ❤️Contributors
 - Havea Crenata ([@crenata](https://github.com/crenata))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.33](https://github.com/crenata/bejibun-redis/compare/v0.1.30...v0.1.33) - 2025-11-09
+## [v0.1.33](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.30...v0.1.33) - 2025-11-09
 
 ### 🩹 Fixes
 - Fix redis configuration
@@ -65,11 +65,11 @@ Now, you can override it by using `setClient()`.
 ### ❤️Contributors
 - Havea Crenata ([@crenata](https://github.com/crenata))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.30](https://github.com/crenata/bejibun-redis/compare/v0.1.29...v0.1.30) - 2025-10-22
+## [v0.1.30](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.29...v0.1.30) - 2025-10-22
 
 ### 🩹 Fixes
 - Fix `configure.ts` configuration file
@@ -80,11 +80,11 @@ Now, you can override it by using `setClient()`.
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.29](https://github.com/crenata/bejibun-redis/compare/v0.1.27...v0.1.29) - 2025-10-22
+## [v0.1.29](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.27...v0.1.29) - 2025-10-22
 
 ### 🩹 Fixes
 
@@ -96,11 +96,11 @@ What's New :
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.27](https://github.com/crenata/bejibun-redis/compare/v0.1.26...v0.1.27) - 2025-10-20
+## [v0.1.27](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.26...v0.1.27) - 2025-10-20
 
 ### 🩹 Fixes
 
@@ -113,11 +113,11 @@ Chore :
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.26](https://github.com/crenata/bejibun-redis/compare/v0.1.24...v0.1.26) - 2025-10-18
+## [v0.1.26](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.24...v0.1.26) - 2025-10-18
 
 ### 🩹 Fixes
 
@@ -129,11 +129,11 @@ What's New :
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.24](https://github.com/crenata/bejibun-redis/compare/v0.1.23...v0.1.24) - 2025-10-16
+## [v0.1.24](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.23...v0.1.24) - 2025-10-16
 
 ### 🩹 Fixes
 
@@ -145,11 +145,11 @@ What's New :
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.23](https://github.com/crenata/bejibun-redis/compare/v0.1.0...v0.1.23) - 2025-10-15
+## [v0.1.23](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.0...v0.1.23) - 2025-10-15
 
 ### 🩹 Fixes
 
@@ -160,11 +160,11 @@ Update build indexing
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
 
 ---
 
-## [v0.1.0](https://github.com/crenata/bejibun-redis/compare/v0.1.0...v0.1.0) - 2025-10-12
+## [v0.1.0](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.0...v0.1.0) - 2025-10-12
 
 ### 🩹 Fixes
 
@@ -190,4 +190,4 @@ Available Redis :
 - Havea Crenata ([@crenata](https://github.com/crenata))
 - Ghulje ([@ghulje](https://github.com/ghulje))
 
-**Full Changelog**: https://github.com/crenata/bejibun-redis/blob/master/CHANGELOG.md
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md

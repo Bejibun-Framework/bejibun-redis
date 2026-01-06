@@ -4,7 +4,7 @@
     "author": "Havea Crenata <havea.crenata@gmail.com>",
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/crenata/bejibun-redis.git"
+        "url": "git+https://github.com/Bejibun-Framework/bejibun-redis.git"
     },
     "main": "index.js",
     "module": "index.js",
@@ -13,10 +13,10 @@
         "tsc-alias": "^1.8.16"
     },
     "bugs": {
-        "url": "https://github.com/crenata/bejibun-redis/issues"
+        "url": "https://github.com/Bejibun-Framework/bejibun-redis/issues"
     },
     "description": "Redis for Bejibun Framework",
-    "homepage": "https://github.com/crenata/bejibun-redis#readme",
+    "homepage": "https://github.com/Bejibun-Framework/bejibun-redis#readme",
     "keywords": [
         "bun",
         "bun framework",
@@ -38,6 +38,6 @@
     "dependencies": {
         "@bejibun/app": "^0.1.22",
         "@bejibun/logger": "^0.1.22",
-        "@bejibun/utils": "^0.1.27"
+        "@bejibun/utils": "^0.1.28"
     }
 }
