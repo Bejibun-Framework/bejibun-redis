@@ -3,6 +3,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.37](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.36...v0.1.37) - 2026-02-14
+
+### 🩹 Fixes
+
+### 📖 Changes
+- Added `.keys(pattern: string)` to get list of key.
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.36](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.35...v0.1.36) - 2025-12-11
 
 ### 🩹 Fixes

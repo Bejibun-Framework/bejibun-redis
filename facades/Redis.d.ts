@@ -4,6 +4,7 @@ export default class Redis {
     static connection(name: string): Record<string, Function>;
     static connect(name?: string): Promise<Bun.RedisClient>;
     static disconnect(name?: string): Promise<void>;
+    static keys(pattern: string, connection?: string): Promise<Array<string>>;
     static get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any>;
     static set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string): Promise<number | "OK">;
     static del(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number>;

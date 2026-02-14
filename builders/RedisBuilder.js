@@ -55,6 +55,18 @@ export default class RedisBuilder {
             this.clients = {};
         }
     }
+    static async keys(pattern, connection, disconnectAfter) {
+        try {
+            const response = await this.getClient(connection).keys(pattern);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return response;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to get value.").trace(error);
+            return [];
+        }
+    }
     static async get(key, connection, disconnectAfter) {
         try {
             const response = await this.getClient(connection).get(key);
