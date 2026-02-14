@@ -18,6 +18,10 @@ export default class Redis {
         return RedisBuilder.disconnect(name);
     }
 
+    public static async keys(pattern: string, connection?: string): Promise<Array<string>> {
+        return RedisBuilder.keys(pattern, connection);
+    }
+
     public static async get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any> {
         return RedisBuilder.get(key, connection);
     }

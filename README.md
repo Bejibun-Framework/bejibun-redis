@@ -69,6 +69,9 @@ import Redis from "@bejibun/redis";
 export default class TestController extends BaseController {
     public async redis(request: Bun.BunRequest): Promise<Response> {
         await Redis.set("redis", {hello: "world"});
+        
+        const keys = await Redis.keys("pattern");
+        
         const redis = await Redis.get("redis");
 
         await Redis.connection("local").set("connection", "This is using custom connection.");
