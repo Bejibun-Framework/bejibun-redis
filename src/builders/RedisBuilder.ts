@@ -20,6 +20,7 @@ export default class RedisBuilder {
         return {
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, isNotEmpty(name)),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, isNotEmpty(name)),
+            keys: (pattern: string) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel: string, message: any) => this.publish(channel, message, connectionName),
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
@@ -31,6 +32,7 @@ export default class RedisBuilder {
         return {
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, name),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, name),
+            keys: (pattern: string) => this.keys(pattern, name),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, name),
             publish: (channel: string, message: any) => this.publish(channel, message, name),
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, name),

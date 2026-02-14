@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [v0.1.37](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.36...v0.1.37) - 2026-02-14
+## [v0.1.38](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.36...v0.1.38) - 2026-02-14
 
 ### 🩹 Fixes
 

@@ -15,6 +15,7 @@ export default class RedisBuilder {
         return {
             del: (key) => this.del(key, connectionName, isNotEmpty(name)),
             get: (key) => this.get(key, connectionName, isNotEmpty(name)),
+            keys: (pattern) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel, message) => this.publish(channel, message, connectionName),
             set: (key, value, ttl) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
@@ -25,6 +26,7 @@ export default class RedisBuilder {
         return {
             del: (key) => this.del(key, name),
             get: (key) => this.get(key, name),
+            keys: (pattern) => this.keys(pattern, name),
             pipeline: (fn) => this.pipeline(fn, name),
             publish: (channel, message) => this.publish(channel, message, name),
             set: (key, value, ttl) => this.set(key, value, ttl, name),
