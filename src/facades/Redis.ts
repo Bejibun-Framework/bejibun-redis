@@ -34,6 +34,14 @@ export default class Redis {
         return RedisBuilder.del(key, connection);
     }
 
+    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number> {
+        return RedisBuilder.ttl(key, connection);
+    }
+
+    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string): Promise<number> {
+        return RedisBuilder.expire(key, value, connection);
+    }
+
     public static async publish(channel: string, message: any, connection?: string): Promise<number> {
         return RedisBuilder.publish(channel, message, connection);
     }

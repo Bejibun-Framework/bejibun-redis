@@ -24,6 +24,12 @@ export default class Redis {
     static async del(key, connection) {
         return RedisBuilder.del(key, connection);
     }
+    static async ttl(key, connection) {
+        return RedisBuilder.ttl(key, connection);
+    }
+    static async expire(key, value, connection) {
+        return RedisBuilder.expire(key, value, connection);
+    }
     static async publish(channel, message, connection) {
         return RedisBuilder.publish(channel, message, connection);
     }

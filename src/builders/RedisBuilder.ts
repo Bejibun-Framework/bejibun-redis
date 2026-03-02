@@ -19,24 +19,28 @@ export default class RedisBuilder {
 
         return {
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, isNotEmpty(name)),
+            expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, connectionName, isNotEmpty(name)),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, isNotEmpty(name)),
             keys: (pattern: string) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel: string, message: any) => this.publish(channel, message, connectionName),
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
             subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) => this.subscribe(channel, listener, connectionName),
+            ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, connectionName, isNotEmpty(name))
         };
     }
 
     public static connection(name: string): Record<string, Function> {
         return {
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, name),
+            expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, name),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, name),
             keys: (pattern: string) => this.keys(pattern, name),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, name),
             publish: (channel: string, message: any) => this.publish(channel, message, name),
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, name),
             subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) => this.subscribe(channel, listener, name),
+            ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, name)
         };
     }
 
@@ -127,6 +131,34 @@ export default class RedisBuilder {
             return data;
         } catch (error: any) {
             Logger.setContext("Redis").error("Failed to delete key.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        try {
+            const data = await this.getClient(connection).ttl(key);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to fetch ttl.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        try {
+            const data = await this.getClient(connection).expire(key, value);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to set expire.").trace(error);
 
             return 0;
         }

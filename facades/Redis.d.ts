@@ -8,6 +8,8 @@ export default class Redis {
     static get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any>;
     static set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string): Promise<number | "OK">;
     static del(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number>;
+    static ttl(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number>;
+    static expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string): Promise<number>;
     static publish(channel: string, message: any, connection?: string): Promise<number>;
     static subscribe(channel: string, listener: Bun.RedisClient.StringPubSubListener, connection?: string): Promise<RedisSubscribe>;
     static pipeline(fn: (pipe: RedisPipeline) => void, connection?: string): Promise<any[]>;

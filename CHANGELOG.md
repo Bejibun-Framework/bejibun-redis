@@ -3,6 +3,21 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.39](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.38...v0.1.39) - 2026-03-02
+
+### 🩹 Fixes
+
+### 📖 Changes
+- Added `.ttl(key: string)` to get ttl of key.
+- Added `.expire(key: string, value: number)` to set key expires.
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.38](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.36...v0.1.38) - 2026-02-14
 
 ### 🩹 Fixes

@@ -14,23 +14,27 @@ export default class RedisBuilder {
         this.clients[connectionName] = this.createClient(connectionName, cfg);
         return {
             del: (key) => this.del(key, connectionName, isNotEmpty(name)),
+            expire: (key, value) => this.expire(key, value, connectionName, isNotEmpty(name)),
             get: (key) => this.get(key, connectionName, isNotEmpty(name)),
             keys: (pattern) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel, message) => this.publish(channel, message, connectionName),
             set: (key, value, ttl) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
             subscribe: (channel, listener) => this.subscribe(channel, listener, connectionName),
+            ttl: (key) => this.ttl(key, connectionName, isNotEmpty(name))
         };
     }
     static connection(name) {
         return {
             del: (key) => this.del(key, name),
+            expire: (key, value) => this.expire(key, value, name),
             get: (key) => this.get(key, name),
             keys: (pattern) => this.keys(pattern, name),
             pipeline: (fn) => this.pipeline(fn, name),
             publish: (channel, message) => this.publish(channel, message, name),
             set: (key, value, ttl) => this.set(key, value, ttl, name),
             subscribe: (channel, listener) => this.subscribe(channel, listener, name),
+            ttl: (key) => this.ttl(key, name)
         };
     }
     static async connect(name) {
@@ -106,6 +110,30 @@ export default class RedisBuilder {
         }
         catch (error) {
             Logger.setContext("Redis").error("Failed to delete key.").trace(error);
+            return 0;
+        }
+    }
+    static async ttl(key, connection, disconnectAfter) {
+        try {
+            const data = await this.getClient(connection).ttl(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to fetch ttl.").trace(error);
+            return 0;
+        }
+    }
+    static async expire(key, value, connection, disconnectAfter) {
+        try {
+            const data = await this.getClient(connection).expire(key, value);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to set expire.").trace(error);
             return 0;
         }
     }
