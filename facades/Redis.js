@@ -12,23 +12,23 @@ export default class Redis {
     static async disconnect(name) {
         return RedisBuilder.disconnect(name);
     }
-    static async keys(pattern, connection) {
-        return RedisBuilder.keys(pattern, connection);
+    static async keys(pattern, connection, disconnectAfter) {
+        return RedisBuilder.keys(pattern, connection, disconnectAfter);
     }
-    static async get(key, connection) {
-        return RedisBuilder.get(key, connection);
+    static async get(key, connection, disconnectAfter) {
+        return RedisBuilder.get(key, connection, disconnectAfter);
     }
-    static async set(key, value, ttl, connection) {
-        return RedisBuilder.set(key, value, ttl, connection);
+    static async set(key, value, ttl, connection, disconnectAfter) {
+        return RedisBuilder.set(key, value, ttl, connection, disconnectAfter);
     }
-    static async del(key, connection) {
-        return RedisBuilder.del(key, connection);
+    static async del(key, connection, disconnectAfter) {
+        return RedisBuilder.del(key, connection, disconnectAfter);
     }
-    static async ttl(key, connection) {
-        return RedisBuilder.ttl(key, connection);
+    static async ttl(key, connection, disconnectAfter) {
+        return RedisBuilder.ttl(key, connection, disconnectAfter);
     }
-    static async expire(key, value, connection) {
-        return RedisBuilder.expire(key, value, connection);
+    static async expire(key, value, connection, disconnectAfter) {
+        return RedisBuilder.expire(key, value, connection, disconnectAfter);
     }
     static async publish(channel, message, connection) {
         return RedisBuilder.publish(channel, message, connection);

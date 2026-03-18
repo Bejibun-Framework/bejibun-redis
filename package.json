@@ -1,6 +1,6 @@
 {
     "name": "@bejibun/redis",
-    "version": "0.1.39",
+    "version": "0.1.40",
     "author": "Havea Crenata <havea.crenata@gmail.com>",
     "repository": {
         "type": "git",

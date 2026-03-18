@@ -4,12 +4,12 @@ export default class Redis {
     static connection(name: string): Record<string, Function>;
     static connect(name?: string): Promise<Bun.RedisClient>;
     static disconnect(name?: string): Promise<void>;
-    static keys(pattern: string, connection?: string): Promise<Array<string>>;
-    static get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any>;
-    static set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string): Promise<number | "OK">;
-    static del(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number>;
-    static ttl(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number>;
-    static expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string): Promise<number>;
+    static keys(pattern: string, connection?: string, disconnectAfter?: boolean): Promise<Array<string>>;
+    static get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<any>;
+    static set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter?: boolean): Promise<number | "OK">;
+    static del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter?: boolean): Promise<number>;
     static publish(channel: string, message: any, connection?: string): Promise<number>;
     static subscribe(channel: string, listener: Bun.RedisClient.StringPubSubListener, connection?: string): Promise<RedisSubscribe>;
     static pipeline(fn: (pipe: RedisPipeline) => void, connection?: string): Promise<any[]>;

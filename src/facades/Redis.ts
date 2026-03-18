@@ -18,28 +18,28 @@ export default class Redis {
         return RedisBuilder.disconnect(name);
     }
 
-    public static async keys(pattern: string, connection?: string): Promise<Array<string>> {
-        return RedisBuilder.keys(pattern, connection);
+    public static async keys(pattern: string, connection?: string, disconnectAfter?: boolean): Promise<Array<string>> {
+        return RedisBuilder.keys(pattern, connection, disconnectAfter);
     }
 
-    public static async get(key: Bun.RedisClient.KeyLike, connection?: string): Promise<any> {
-        return RedisBuilder.get(key, connection);
+    public static async get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<any> {
+        return RedisBuilder.get(key, connection, disconnectAfter);
     }
 
-    public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string): Promise<number | "OK"> {
-        return RedisBuilder.set(key, value, ttl, connection);
+    public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter?: boolean): Promise<number | "OK"> {
+        return RedisBuilder.set(key, value, ttl, connection, disconnectAfter);
     }
 
-    public static async del(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number> {
-        return RedisBuilder.del(key, connection);
+    public static async del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.del(key, connection, disconnectAfter);
     }
 
-    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string): Promise<number> {
-        return RedisBuilder.ttl(key, connection);
+    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.ttl(key, connection, disconnectAfter);
     }
 
-    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string): Promise<number> {
-        return RedisBuilder.expire(key, value, connection);
+    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.expire(key, value, connection, disconnectAfter);
     }
 
     public static async publish(channel: string, message: any, connection?: string): Promise<number> {

@@ -61,7 +61,7 @@ export default class RedisBuilder {
             this.clients = {};
         }
     }
-    static async keys(pattern, connection, disconnectAfter) {
+    static async keys(pattern, connection, disconnectAfter = true) {
         try {
             const response = await this.getClient(connection).keys(pattern);
             if (disconnectAfter)
@@ -73,7 +73,7 @@ export default class RedisBuilder {
             return [];
         }
     }
-    static async get(key, connection, disconnectAfter) {
+    static async get(key, connection, disconnectAfter = true) {
         try {
             const response = await this.getClient(connection).get(key);
             if (disconnectAfter)
@@ -85,7 +85,7 @@ export default class RedisBuilder {
             return null;
         }
     }
-    static async set(key, value, ttl, connection, disconnectAfter) {
+    static async set(key, value, ttl, connection, disconnectAfter = true) {
         try {
             const client = this.getClient(connection);
             const serialized = this.serialize(value);
@@ -101,7 +101,7 @@ export default class RedisBuilder {
             return 0;
         }
     }
-    static async del(key, connection, disconnectAfter) {
+    static async del(key, connection, disconnectAfter = true) {
         try {
             const data = await this.getClient(connection).del(key);
             if (disconnectAfter)
@@ -113,7 +113,7 @@ export default class RedisBuilder {
             return 0;
         }
     }
-    static async ttl(key, connection, disconnectAfter) {
+    static async ttl(key, connection, disconnectAfter = true) {
         try {
             const data = await this.getClient(connection).ttl(key);
             if (disconnectAfter)
@@ -125,7 +125,7 @@ export default class RedisBuilder {
             return 0;
         }
     }
-    static async expire(key, value, connection, disconnectAfter) {
+    static async expire(key, value, connection, disconnectAfter = true) {
         try {
             const data = await this.getClient(connection).expire(key, value);
             if (disconnectAfter)
@@ -174,7 +174,7 @@ export default class RedisBuilder {
             unsubscribe: unsubscribe
         };
     }
-    static async pipeline(fn, connection, disconnectAfter) {
+    static async pipeline(fn, connection, disconnectAfter = true) {
         const client = this.getClient(connection);
         const ops = [];
         const pipe = {

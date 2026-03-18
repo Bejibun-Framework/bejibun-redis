@@ -75,7 +75,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async keys(pattern: string, connection?: string, disconnectAfter?: boolean): Promise<Array<string>> {
+    public static async keys(pattern: string, connection?: string, disconnectAfter: boolean = true): Promise<Array<string>> {
         try {
             const response = await this.getClient(connection).keys(pattern);
 
@@ -89,7 +89,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<any> {
+    public static async get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<any> {
         try {
             const response = await this.getClient(connection).get(key);
 
@@ -103,7 +103,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter?: boolean): Promise<number | "OK"> {
+    public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter: boolean = true): Promise<number | "OK"> {
         try {
             const client = this.getClient(connection);
             const serialized = this.serialize(value);
@@ -122,7 +122,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+    public static async del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
         try {
             const data = await this.getClient(connection).del(key);
 
@@ -136,7 +136,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
         try {
             const data = await this.getClient(connection).ttl(key);
 
@@ -150,7 +150,7 @@ export default class RedisBuilder {
         }
     }
 
-    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter?: boolean): Promise<number> {
+    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
         try {
             const data = await this.getClient(connection).expire(key, value);
 
@@ -209,7 +209,7 @@ export default class RedisBuilder {
         };
     }
 
-    public static async pipeline(fn: (pipe: RedisPipeline) => void, connection?: string, disconnectAfter?: boolean) {
+    public static async pipeline(fn: (pipe: RedisPipeline) => void, connection?: string, disconnectAfter: boolean = true) {
         const client = this.getClient(connection);
         const ops: Array<Promise<any>> = [];
 
