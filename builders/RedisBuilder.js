@@ -47,15 +47,13 @@ export default class RedisBuilder {
     static async disconnect(name) {
         if (isNotEmpty(name)) {
             const client = this.clients[name];
-            if (isNotEmpty(client)) {
-                await client.close();
-                delete this.clients[name];
-                Logger.setContext("Redis").warn(`Disconnected manually from "${name}" connection.`);
-            }
+            await client?.close();
+            delete this.clients[name];
+            Logger.setContext("Redis").warn(`Disconnected manually from "${name}" connection.`);
         }
         else {
             for (const [connectionName, client] of Object.entries(this.clients)) {
-                await client.close();
+                await client?.close();
                 Logger.setContext("Redis").warn(`Disconnected manually from "${connectionName}" connection.`);
             }
             this.clients = {};
@@ -91,7 +89,7 @@ export default class RedisBuilder {
             const serialized = this.serialize(value);
             const data = await client.set(key, serialized);
             if (isNotEmpty(ttl))
-                return await client.expire(key, ttl);
+                await client.expire(key, ttl);
             if (disconnectAfter)
                 await this.disconnect(connection);
             return data;
