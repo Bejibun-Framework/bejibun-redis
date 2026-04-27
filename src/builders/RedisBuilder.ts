@@ -60,13 +60,9 @@ export default class RedisBuilder {
 
             await client?.close();
             delete this.clients[name as string];
-
-            Logger.setContext("Redis").warn(`Disconnected manually from "${name}" connection.`);
         } else {
-            for (const [connectionName, client] of Object.entries(this.clients)) {
+            for (const [_, client] of Object.entries(this.clients)) {
                 await client?.close();
-
-                Logger.setContext("Redis").warn(`Disconnected manually from "${connectionName}" connection.`);
             }
 
             this.clients = {};
