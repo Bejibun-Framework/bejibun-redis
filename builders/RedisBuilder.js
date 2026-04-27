@@ -238,7 +238,13 @@ export default class RedisBuilder {
     }
     static getConfig(name) {
         const connectionName = defineValue(name, this.config.default);
-        const connection = this.config.connections[connectionName];
+        const connection = defineValue(this.config.connections[connectionName], defineValue(this.config.connections[defineValue(Bun.env.REDIS_CONNECTION, "local")], {
+            host: "127.0.0.1",
+            port: 6379,
+            password: "",
+            database: 0,
+            maxRetries: 10
+        }));
         if (isEmpty(connection))
             throw new RedisException(`Connection "${connectionName}" not found.`);
         return connection;
