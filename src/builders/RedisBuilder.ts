@@ -18,9 +18,14 @@ export default class RedisBuilder {
         this.clients[connectionName] = this.createClient(connectionName, cfg);
 
         return {
+            decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, connectionName, isNotEmpty(name)),
+            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) => this.decrBy(key, decrement, connectionName, isNotEmpty(name)),
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, isNotEmpty(name)),
+            exists: (key: Bun.RedisClient.KeyLike) => this.exists(key, connectionName, isNotEmpty(name)),
             expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, connectionName, isNotEmpty(name)),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, isNotEmpty(name)),
+            incr: (key: Bun.RedisClient.KeyLike) => this.incr(key, connectionName, isNotEmpty(name)),
+            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) => this.incrBy(key, increment, connectionName, isNotEmpty(name)),
             keys: (pattern: string) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel: string, message: any) => this.publish(channel, message, connectionName),
@@ -32,9 +37,14 @@ export default class RedisBuilder {
 
     public static connection(name: string): Record<string, Function> {
         return {
+            decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, name),
+            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) => this.decrBy(key, decrement, name),
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, name),
+            exists: (key: Bun.RedisClient.KeyLike) => this.exists(key, name),
             expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, name),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, name),
+            incr: (key: Bun.RedisClient.KeyLike) => this.incr(key, name),
+            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) => this.incrBy(key, increment, name),
             keys: (pattern: string) => this.keys(pattern, name),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, name),
             publish: (channel: string, message: any) => this.publish(channel, message, name),
@@ -58,11 +68,20 @@ export default class RedisBuilder {
         if (isNotEmpty(name)) {
             const client = this.clients[name as string];
 
-            await client?.close();
+            try {
+                await client?.close();
+            } catch {
+                // do nothing
+            }
+
             delete this.clients[name as string];
         } else {
             for (const [_, client] of Object.entries(this.clients)) {
-                await client?.close();
+                try {
+                    await client?.close();
+                } catch {
+                    // do nothing
+                }
             }
 
             this.clients = {};
@@ -125,6 +144,76 @@ export default class RedisBuilder {
             return data;
         } catch (error: any) {
             Logger.setContext("Redis").error("Failed to delete key.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async exists(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<boolean> {
+        try {
+            const data = await this.getClient(connection).exists(key);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to check key.").trace(error);
+
+            return false;
+        }
+    }
+
+    public static async incr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+        try {
+            const data = await this.getClient(connection).incr(key);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to increase key.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async decr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+        try {
+            const data = await this.getClient(connection).decr(key);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to decrease key.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async incrBy(key: Bun.RedisClient.KeyLike, increment: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+        try {
+            const data = await this.getClient(connection).incrby(key, increment);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to increase key.").trace(error);
+
+            return 0;
+        }
+    }
+
+    public static async decrBy(key: Bun.RedisClient.KeyLike, decrement: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+        try {
+            const data = await this.getClient(connection).decrby(key, decrement);
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return data;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to decrease key.").trace(error);
 
             return 0;
         }

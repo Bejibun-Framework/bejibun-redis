@@ -103,6 +103,14 @@ export default class TestController extends BaseController {
 
         await subscriber.unsubscribe();
 
+        await Redis.exists("visitors");
+
+        await Redis.incr("visitors");
+        await Redis.decr("visitors");
+
+        await Redis.incrBy("visitors", 10);
+        await Redis.decrBy("visitors", 5);
+
         return super.response.setData({redis, connection, pipeline}).send();
     }
 }

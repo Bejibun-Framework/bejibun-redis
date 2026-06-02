@@ -24,6 +24,21 @@ export default class Redis {
     static async del(key, connection, disconnectAfter) {
         return RedisBuilder.del(key, connection, disconnectAfter);
     }
+    static async exists(key, connection, disconnectAfter) {
+        return RedisBuilder.exists(key, connection, disconnectAfter);
+    }
+    static async incr(key, connection, disconnectAfter) {
+        return RedisBuilder.incr(key, connection, disconnectAfter);
+    }
+    static async decr(key, connection, disconnectAfter) {
+        return RedisBuilder.decr(key, connection, disconnectAfter);
+    }
+    static async incrBy(key, increment, connection, disconnectAfter) {
+        return RedisBuilder.incrBy(key, increment, connection, disconnectAfter);
+    }
+    static async decrBy(key, decrement, connection, disconnectAfter) {
+        return RedisBuilder.decrBy(key, decrement, connection, disconnectAfter);
+    }
     static async ttl(key, connection, disconnectAfter) {
         return RedisBuilder.ttl(key, connection, disconnectAfter);
     }

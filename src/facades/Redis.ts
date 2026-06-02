@@ -34,6 +34,26 @@ export default class Redis {
         return RedisBuilder.del(key, connection, disconnectAfter);
     }
 
+    public static async exists(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<boolean> {
+        return RedisBuilder.exists(key, connection, disconnectAfter);
+    }
+
+    public static async incr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.incr(key, connection, disconnectAfter);
+    }
+
+    public static async decr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.decr(key, connection, disconnectAfter);
+    }
+
+    public static async incrBy(key: Bun.RedisClient.KeyLike, increment: number, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.incrBy(key, increment, connection, disconnectAfter);
+    }
+
+    public static async decrBy(key: Bun.RedisClient.KeyLike, decrement: number, connection?: string, disconnectAfter?: boolean): Promise<number> {
+        return RedisBuilder.decrBy(key, decrement, connection, disconnectAfter);
+    }
+
     public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number> {
         return RedisBuilder.ttl(key, connection, disconnectAfter);
     }

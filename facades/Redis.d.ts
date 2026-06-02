@@ -8,6 +8,11 @@ export default class Redis {
     static get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<any>;
     static set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter?: boolean): Promise<number | "OK">;
     static del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static exists(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<boolean>;
+    static incr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static decr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static incrBy(key: Bun.RedisClient.KeyLike, increment: number, connection?: string, disconnectAfter?: boolean): Promise<number>;
+    static decrBy(key: Bun.RedisClient.KeyLike, decrement: number, connection?: string, disconnectAfter?: boolean): Promise<number>;
     static ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<number>;
     static expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter?: boolean): Promise<number>;
     static publish(channel: string, message: any, connection?: string): Promise<number>;

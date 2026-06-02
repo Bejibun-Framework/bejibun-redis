@@ -3,6 +3,35 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.45](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.44...v0.1.45) - 2026-06-02
+
+### 🩹 Fixes
+
+### 📖 Changes
+- Added `.exists()` Check whether a key exists
+- Added `.incr()` Increment a numeric value by 1
+- Added `.decr()` Decrement a numeric value by 1
+- Added `.incrBy()` Increment a numeric value by a specified amount
+- Added `.decrBy()` Decrement a numeric value by a specified amount
+
+#### Example :
+```ts
+await Redis.exists("visitors");
+
+await Redis.incr("visitors");
+await Redis.decr("visitors");
+
+await Redis.incrBy("visitors", 10);
+await Redis.decrBy("visitors", 5);
+```
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.44](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.39...v0.1.44) - 2026-03-18
 
 ### 🩹 Fixes

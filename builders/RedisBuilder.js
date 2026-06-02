@@ -13,9 +13,14 @@ export default class RedisBuilder {
         const connectionName = defineValue(name, Str.random());
         this.clients[connectionName] = this.createClient(connectionName, cfg);
         return {
+            decr: (key) => this.decr(key, connectionName, isNotEmpty(name)),
+            decrBy: (key, decrement) => this.decrBy(key, decrement, connectionName, isNotEmpty(name)),
             del: (key) => this.del(key, connectionName, isNotEmpty(name)),
+            exists: (key) => this.exists(key, connectionName, isNotEmpty(name)),
             expire: (key, value) => this.expire(key, value, connectionName, isNotEmpty(name)),
             get: (key) => this.get(key, connectionName, isNotEmpty(name)),
+            incr: (key) => this.incr(key, connectionName, isNotEmpty(name)),
+            incrBy: (key, increment) => this.incrBy(key, increment, connectionName, isNotEmpty(name)),
             keys: (pattern) => this.keys(pattern, connectionName, isNotEmpty(name)),
             pipeline: (fn) => this.pipeline(fn, connectionName, isNotEmpty(name)),
             publish: (channel, message) => this.publish(channel, message, connectionName),
@@ -26,9 +31,14 @@ export default class RedisBuilder {
     }
     static connection(name) {
         return {
+            decr: (key) => this.decr(key, name),
+            decrBy: (key, decrement) => this.decrBy(key, decrement, name),
             del: (key) => this.del(key, name),
+            exists: (key) => this.exists(key, name),
             expire: (key, value) => this.expire(key, value, name),
             get: (key) => this.get(key, name),
+            incr: (key) => this.incr(key, name),
+            incrBy: (key, increment) => this.incrBy(key, increment, name),
             keys: (pattern) => this.keys(pattern, name),
             pipeline: (fn) => this.pipeline(fn, name),
             publish: (channel, message) => this.publish(channel, message, name),
@@ -47,12 +57,22 @@ export default class RedisBuilder {
     static async disconnect(name) {
         if (isNotEmpty(name)) {
             const client = this.clients[name];
-            await client?.close();
+            try {
+                await client?.close();
+            }
+            catch {
+                // do nothing
+            }
             delete this.clients[name];
         }
         else {
             for (const [_, client] of Object.entries(this.clients)) {
-                await client?.close();
+                try {
+                    await client?.close();
+                }
+                catch {
+                    // do nothing
+                }
             }
             this.clients = {};
         }
@@ -106,6 +126,66 @@ export default class RedisBuilder {
         }
         catch (error) {
             Logger.setContext("Redis").error("Failed to delete key.").trace(error);
+            return 0;
+        }
+    }
+    static async exists(key, connection, disconnectAfter = true) {
+        try {
+            const data = await this.getClient(connection).exists(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to check key.").trace(error);
+            return false;
+        }
+    }
+    static async incr(key, connection, disconnectAfter = true) {
+        try {
+            const data = await this.getClient(connection).incr(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to increase key.").trace(error);
+            return 0;
+        }
+    }
+    static async decr(key, connection, disconnectAfter = true) {
+        try {
+            const data = await this.getClient(connection).decr(key);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to decrease key.").trace(error);
+            return 0;
+        }
+    }
+    static async incrBy(key, increment, connection, disconnectAfter = true) {
+        try {
+            const data = await this.getClient(connection).incrby(key, increment);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to increase key.").trace(error);
+            return 0;
+        }
+    }
+    static async decrBy(key, decrement, connection, disconnectAfter = true) {
+        try {
+            const data = await this.getClient(connection).decrby(key, decrement);
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return data;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to decrease key.").trace(error);
             return 0;
         }
     }
