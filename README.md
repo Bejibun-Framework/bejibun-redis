@@ -3,7 +3,7 @@
 <img src="https://github.com/Bejibun-Framework/bejibun/blob/master/public/images/bejibun.png?raw=true" width="150" alt="Bejibun" />
 
 ![GitHub top language](https://img.shields.io/github/languages/top/Bejibun-Framework/bejibun-redis)
-![GitHub all releases](https://img.shields.io/github/downloads/Bejibun-Framework/bejibun-redis/total)
+![NPM Downloads](https://img.shields.io/npm/d18m/%40bejibun%2Fredis)
 ![GitHub issues](https://img.shields.io/github/issues/Bejibun-Framework/bejibun-redis)
 ![GitHub](https://img.shields.io/github/license/Bejibun-Framework/bejibun-redis)
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/Bejibun-Framework/bejibun-redis?display_name=tag&include_prereleases)
