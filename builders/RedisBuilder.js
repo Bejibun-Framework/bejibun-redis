@@ -77,6 +77,18 @@ export default class RedisBuilder {
             this.clients = {};
         }
     }
+    static async ping(message, connection, disconnectAfter = true) {
+        try {
+            const response = await this.getClient(connection).ping(defineValue(message));
+            if (disconnectAfter)
+                await this.disconnect(connection);
+            return response;
+        }
+        catch (error) {
+            Logger.setContext("Redis").error("Failed to ping value.").trace(error);
+            return false;
+        }
+    }
     static async keys(pattern, connection, disconnectAfter = true) {
         try {
             const response = await this.getClient(connection).keys(pattern);
@@ -85,7 +97,7 @@ export default class RedisBuilder {
             return response;
         }
         catch (error) {
-            Logger.setContext("Redis").error("Failed to get value.").trace(error);
+            Logger.setContext("Redis").error("Failed to get keys.").trace(error);
             return [];
         }
     }
@@ -254,11 +266,32 @@ export default class RedisBuilder {
         const client = this.getClient(connection);
         const ops = [];
         const pipe = {
+            decr: (key) => {
+                ops.push(client.decr(key));
+            },
+            decrBy: (key, decrement) => {
+                ops.push(client.decrby(key, decrement));
+            },
             del: (key) => {
                 ops.push(client.del(key));
             },
+            exists: (key) => {
+                ops.push(client.exists(key));
+            },
+            expire: (key, value) => {
+                ops.push(client.expire(key, value));
+            },
             get: (key) => {
                 ops.push(client.get(key));
+            },
+            incr: (key) => {
+                ops.push(client.incr(key));
+            },
+            incrBy: (key, increment) => {
+                ops.push(client.incrby(key, increment));
+            },
+            keys: (pattern) => {
+                ops.push(client.keys(pattern));
             },
             set: (key, value, ttl) => {
                 const serialized = this.serialize(value);
@@ -266,6 +299,9 @@ export default class RedisBuilder {
                 if (isNotEmpty(ttl))
                     ops.push(client.expire(key, ttl));
                 ops.push(data);
+            },
+            ttl: (key) => {
+                ops.push(client.ttl(key));
             }
         };
         fn(pipe);
