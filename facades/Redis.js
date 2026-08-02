@@ -12,6 +12,9 @@ export default class Redis {
     static async disconnect(name) {
         return RedisBuilder.disconnect(name);
     }
+    static async ping(message, connection, disconnectAfter) {
+        return RedisBuilder.ping(message, connection, disconnectAfter);
+    }
     static async keys(pattern, connection, disconnectAfter) {
         return RedisBuilder.keys(pattern, connection, disconnectAfter);
     }

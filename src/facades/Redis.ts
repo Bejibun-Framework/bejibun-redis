@@ -18,6 +18,10 @@ export default class Redis {
         return RedisBuilder.disconnect(name);
     }
 
+    public static async ping(message?: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<string | boolean> {
+        return RedisBuilder.ping(message, connection, disconnectAfter);
+    }
+
     public static async keys(pattern: string, connection?: string, disconnectAfter?: boolean): Promise<Array<string>> {
         return RedisBuilder.keys(pattern, connection, disconnectAfter);
     }

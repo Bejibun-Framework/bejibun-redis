@@ -3,6 +3,38 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.46](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.45...v0.1.46) - 2026-08-02
+
+### 🩹 Fixes
+- Fixed incorrect log message in `.keys()` — was logging "Failed to get value." instead of "Failed to get keys."
+
+### 📖 Changes
+- Added `.ping()` to check connectivity / send a PING to the Redis server, with optional message, connection, and `disconnectAfter` params
+- Extended `.pipeline()` with new batched operations: `.decr()`, `.decrBy()`, `.exists()`, `.expire()`, `.incr()`, `.incrBy()`, `.keys()`, and `.ttl()` (previously the pipeline builder only supported `.del()`, `.get()`, and `.set()`)
+- Bumped `tsc-alias` devDependency from `^1.8.17` to `^1.9.1`
+- Cleaned up `tsconfig.json` (`baseUrl` removed, `@/*` path updated to `./src/*`)
+
+#### Example:
+```ts
+await Redis.ping();
+
+await Redis.pipeline((pipe) => {
+    pipe.incr("visitors");
+    pipe.decrBy("stock", 3);
+    pipe.exists("session:123");
+    pipe.expire("session:123", 3600);
+    pipe.keys("cache:*");
+    pipe.ttl("session:123");
+});
+```
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.45](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.44...v0.1.45) - 2026-06-02
 
 ### 🩹 Fixes
@@ -14,7 +46,7 @@ All notable changes to this project will be documented in this file.
 - Added `.incrBy()` Increment a numeric value by a specified amount
 - Added `.decrBy()` Decrement a numeric value by a specified amount
 
-#### Example :
+#### Example:
 ```ts
 await Redis.exists("visitors");
 

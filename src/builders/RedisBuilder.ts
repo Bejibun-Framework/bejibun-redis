@@ -88,6 +88,20 @@ export default class RedisBuilder {
         }
     }
 
+    public static async ping(message?: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<string | boolean> {
+        try {
+            const response = await this.getClient(connection).ping(defineValue(message));
+
+            if (disconnectAfter) await this.disconnect(connection);
+
+            return response;
+        } catch (error: any) {
+            Logger.setContext("Redis").error("Failed to ping value.").trace(error);
+
+            return false;
+        }
+    }
+
     public static async keys(pattern: string, connection?: string, disconnectAfter: boolean = true): Promise<Array<string>> {
         try {
             const response = await this.getClient(connection).keys(pattern);
@@ -96,7 +110,7 @@ export default class RedisBuilder {
 
             return response;
         } catch (error: any) {
-            Logger.setContext("Redis").error("Failed to get value.").trace(error);
+            Logger.setContext("Redis").error("Failed to get keys.").trace(error);
 
             return [];
         }
@@ -297,11 +311,32 @@ export default class RedisBuilder {
         const ops: Array<Promise<any>> = [];
 
         const pipe: RedisPipeline = {
+            decr: (key: Bun.RedisClient.KeyLike): void => {
+                ops.push(client.decr(key));
+            },
+            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number): void => {
+                ops.push(client.decrby(key, decrement));
+            },
             del: (key: Bun.RedisClient.KeyLike): void => {
                 ops.push(client.del(key));
             },
+            exists: (key: Bun.RedisClient.KeyLike): void => {
+                ops.push(client.exists(key));
+            },
+            expire: (key: Bun.RedisClient.KeyLike, value: number): void => {
+                ops.push(client.expire(key, value));
+            },
             get: (key: Bun.RedisClient.KeyLike): void => {
                 ops.push(client.get(key));
+            },
+            incr: (key: Bun.RedisClient.KeyLike): void => {
+                ops.push(client.incr(key));
+            },
+            incrBy: (key: Bun.RedisClient.KeyLike, increment: number): void => {
+                ops.push(client.incrby(key, increment));
+            },
+            keys: (pattern: string): void => {
+                ops.push(client.keys(pattern));
             },
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number): void => {
                 const serialized = this.serialize(value);
@@ -311,6 +346,9 @@ export default class RedisBuilder {
                 if (isNotEmpty(ttl)) ops.push(client.expire(key, ttl as number));
 
                 ops.push(data);
+            },
+            ttl: (key: Bun.RedisClient.KeyLike): void => {
+                ops.push(client.ttl(key));
             }
         };
 
