@@ -12,44 +12,61 @@ export default class RedisBuilder {
     private static clients: Record<string, Bun.RedisClient> = {};
     private static emitter = new EventEmitter();
 
-    public static setClient(cfg: RedisConfig, name?: string): Record<string, Function> {
+    public static setClient(
+        cfg: RedisConfig,
+        name?: string
+    ): Record<string, (...args: Array<any>) => {}> {
         const connectionName = defineValue(name, Str.random());
 
         this.clients[connectionName] = this.createClient(connectionName, cfg);
 
         return {
-            decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, connectionName, isNotEmpty(name)),
-            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) => this.decrBy(key, decrement, connectionName, isNotEmpty(name)),
+            decr: (key: Bun.RedisClient.KeyLike) =>
+                this.decr(key, connectionName, isNotEmpty(name)),
+            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) =>
+                this.decrBy(key, decrement, connectionName, isNotEmpty(name)),
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, isNotEmpty(name)),
-            exists: (key: Bun.RedisClient.KeyLike) => this.exists(key, connectionName, isNotEmpty(name)),
-            expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, connectionName, isNotEmpty(name)),
+            exists: (key: Bun.RedisClient.KeyLike) =>
+                this.exists(key, connectionName, isNotEmpty(name)),
+            expire: (key: Bun.RedisClient.KeyLike, value: number) =>
+                this.expire(key, value, connectionName, isNotEmpty(name)),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, isNotEmpty(name)),
-            incr: (key: Bun.RedisClient.KeyLike) => this.incr(key, connectionName, isNotEmpty(name)),
-            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) => this.incrBy(key, increment, connectionName, isNotEmpty(name)),
+            incr: (key: Bun.RedisClient.KeyLike) =>
+                this.incr(key, connectionName, isNotEmpty(name)),
+            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) =>
+                this.incrBy(key, increment, connectionName, isNotEmpty(name)),
             keys: (pattern: string) => this.keys(pattern, connectionName, isNotEmpty(name)),
-            pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, connectionName, isNotEmpty(name)),
-            publish: (channel: string, message: any) => this.publish(channel, message, connectionName),
-            set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, connectionName, isNotEmpty(name)),
-            subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) => this.subscribe(channel, listener, connectionName),
+            pipeline: (fn: (pipe: RedisPipeline) => void) =>
+                this.pipeline(fn, connectionName, isNotEmpty(name)),
+            publish: (channel: string, message: any) =>
+                this.publish(channel, message, connectionName),
+            set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) =>
+                this.set(key, value, ttl, connectionName, isNotEmpty(name)),
+            subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) =>
+                this.subscribe(channel, listener, connectionName),
             ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, connectionName, isNotEmpty(name))
         };
     }
 
-    public static connection(name: string): Record<string, Function> {
+    public static connection(name: string): Record<string, (...args: Array<any>) => {}> {
         return {
             decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, name),
-            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) => this.decrBy(key, decrement, name),
+            decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) =>
+                this.decrBy(key, decrement, name),
             del: (key: Bun.RedisClient.KeyLike) => this.del(key, name),
             exists: (key: Bun.RedisClient.KeyLike) => this.exists(key, name),
             expire: (key: Bun.RedisClient.KeyLike, value: number) => this.expire(key, value, name),
             get: (key: Bun.RedisClient.KeyLike) => this.get(key, name),
             incr: (key: Bun.RedisClient.KeyLike) => this.incr(key, name),
-            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) => this.incrBy(key, increment, name),
+            incrBy: (key: Bun.RedisClient.KeyLike, increment: number) =>
+                this.incrBy(key, increment, name),
             keys: (pattern: string) => this.keys(pattern, name),
             pipeline: (fn: (pipe: RedisPipeline) => void) => this.pipeline(fn, name),
             publish: (channel: string, message: any) => this.publish(channel, message, name),
-            set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) => this.set(key, value, ttl, name),
-            subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) => this.subscribe(channel, listener, name),
+            set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) =>
+                this.set(key, value, ttl, name),
+            subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) =>
+                this.subscribe(channel, listener, name),
             ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, name)
         };
     }
@@ -58,7 +75,9 @@ export default class RedisBuilder {
         const client = this.getClient(name);
         await client.connect();
 
-        Logger.setContext("Redis").info(`Connected manually to "${defineValue(name, "default")}" connection.`);
+        Logger.setContext("Redis").info(
+            `Connected manually to "${defineValue(name, "default")}" connection.`
+        );
         this.emitter.emit("connect", defineValue(name, "default"));
 
         return client;
@@ -88,7 +107,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async ping(message?: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<string | boolean> {
+    public static async ping(
+        message?: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<string | boolean> {
         try {
             const response = await this.getClient(connection).ping(defineValue(message));
 
@@ -102,7 +125,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async keys(pattern: string, connection?: string, disconnectAfter: boolean = true): Promise<Array<string>> {
+    public static async keys(
+        pattern: string,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<Array<string>> {
         try {
             const response = await this.getClient(connection).keys(pattern);
 
@@ -116,7 +143,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async get(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<any> {
+    public static async get(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<any> {
         try {
             const response = await this.getClient(connection).get(key);
 
@@ -130,7 +161,13 @@ export default class RedisBuilder {
         }
     }
 
-    public static async set(key: Bun.RedisClient.KeyLike, value: any, ttl?: number, connection?: string, disconnectAfter: boolean = true): Promise<number | "OK"> {
+    public static async set(
+        key: Bun.RedisClient.KeyLike,
+        value: any,
+        ttl?: number,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number | "OK"> {
         try {
             const client = this.getClient(connection);
             const serialized = this.serialize(value);
@@ -149,7 +186,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async del(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async del(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).del(key);
 
@@ -163,7 +204,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async exists(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<boolean> {
+    public static async exists(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<boolean> {
         try {
             const data = await this.getClient(connection).exists(key);
 
@@ -177,7 +222,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async incr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async incr(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).incr(key);
 
@@ -191,7 +240,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async decr(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async decr(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).decr(key);
 
@@ -205,7 +258,12 @@ export default class RedisBuilder {
         }
     }
 
-    public static async incrBy(key: Bun.RedisClient.KeyLike, increment: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async incrBy(
+        key: Bun.RedisClient.KeyLike,
+        increment: number,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).incrby(key, increment);
 
@@ -219,7 +277,12 @@ export default class RedisBuilder {
         }
     }
 
-    public static async decrBy(key: Bun.RedisClient.KeyLike, decrement: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async decrBy(
+        key: Bun.RedisClient.KeyLike,
+        decrement: number,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).decrby(key, decrement);
 
@@ -233,7 +296,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async ttl(key: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async ttl(
+        key: Bun.RedisClient.KeyLike,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).ttl(key);
 
@@ -247,7 +314,12 @@ export default class RedisBuilder {
         }
     }
 
-    public static async expire(key: Bun.RedisClient.KeyLike, value: number, connection?: string, disconnectAfter: boolean = true): Promise<number> {
+    public static async expire(
+        key: Bun.RedisClient.KeyLike,
+        value: number,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ): Promise<number> {
         try {
             const data = await this.getClient(connection).expire(key, value);
 
@@ -261,7 +333,11 @@ export default class RedisBuilder {
         }
     }
 
-    public static async publish(channel: string, message: any, connection?: string): Promise<number> {
+    public static async publish(
+        channel: string,
+        message: any,
+        connection?: string
+    ): Promise<number> {
         try {
             const serialized = this.serialize(message);
 
@@ -273,16 +349,24 @@ export default class RedisBuilder {
         }
     }
 
-    public static async subscribe(channel: string, listener: Bun.RedisClient.StringPubSubListener, connection?: string): Promise<RedisSubscribe> {
+    public static async subscribe(
+        channel: string,
+        listener: Bun.RedisClient.StringPubSubListener,
+        connection?: string
+    ): Promise<RedisSubscribe> {
         const client = this.getClient(connection);
         this.clients[channel] = client;
 
         try {
-            await client.subscribe(channel, (message: string, channel: string) => listener(this.deserialize(message), channel));
+            await client.subscribe(channel, (message: string, channel: string) =>
+                listener(this.deserialize(message), channel)
+            );
 
             Logger.setContext("Redis").info(`Subscribed to "${channel}" channel.`);
         } catch (error: any) {
-            Logger.setContext("Redis").error(`Failed to subscribe "${channel}" channel.`).trace(error);
+            Logger.setContext("Redis")
+                .error(`Failed to subscribe "${channel}" channel.`)
+                .trace(error);
         }
 
         const unsubscribe = async () => {
@@ -294,7 +378,9 @@ export default class RedisBuilder {
 
                 return true;
             } catch (error: any) {
-                Logger.setContext("Redis").error(`Failed to unsubscribe from "${channel}" channel.`).trace(error);
+                Logger.setContext("Redis")
+                    .error(`Failed to unsubscribe from "${channel}" channel.`)
+                    .trace(error);
 
                 return false;
             }
@@ -306,7 +392,11 @@ export default class RedisBuilder {
         };
     }
 
-    public static async pipeline(fn: (pipe: RedisPipeline) => void, connection?: string, disconnectAfter: boolean = true) {
+    public static async pipeline(
+        fn: (pipe: RedisPipeline) => void,
+        connection?: string,
+        disconnectAfter: boolean = true
+    ) {
         const client = this.getClient(connection);
         const ops: Array<Promise<any>> = [];
 
@@ -361,11 +451,17 @@ export default class RedisBuilder {
         return results.map((result: any) => this.deserialize(result));
     }
 
-    public static on(event: "connect" | "disconnect" | "error", listener: (...args: Array<any>) => void): void {
+    public static on(
+        event: "connect" | "disconnect" | "error",
+        listener: (...args: Array<any>) => void
+    ): void {
         this.emitter.on(event, listener);
     }
 
-    public static off(event: "connect" | "disconnect" | "error", listener: (...args: Array<any>) => void): void {
+    public static off(
+        event: "connect" | "disconnect" | "error",
+        listener: (...args: Array<any>) => void
+    ): void {
         this.emitter.off(event, listener);
     }
 
@@ -417,19 +513,17 @@ export default class RedisBuilder {
         const connectionName = defineValue(name, this.config.default);
         const connection = defineValue(
             this.config.connections[connectionName],
-            defineValue(
-                this.config.connections[defineValue(Bun.env.REDIS_CONNECTION, "local")],
-                {
-                    host: "127.0.0.1",
-                    port: 6379,
-                    password: "",
-                    database: 0,
-                    maxRetries: 10
-                }
-            )
+            defineValue(this.config.connections[defineValue(Bun.env.REDIS_CONNECTION, "local")], {
+                host: "127.0.0.1",
+                port: 6379,
+                password: "",
+                database: 0,
+                maxRetries: 10
+            })
         );
 
-        if (isEmpty(connection)) throw new RedisException(`Connection "${connectionName}" not found.`);
+        if (isEmpty(connection))
+            throw new RedisException(`Connection "${connectionName}" not found.`);
 
         return connection;
     }
@@ -460,12 +554,12 @@ export default class RedisBuilder {
 
         try {
             return JSON.parse(value as string);
-        } catch (error) {
+        } catch {
             return value;
         }
     }
 
-    private static ensureExitHooks = ((): Function => {
+    private static ensureExitHooks = (() => {
         let initialized = false;
 
         return (): void => {
@@ -477,7 +571,9 @@ export default class RedisBuilder {
                 try {
                     await RedisBuilder.disconnect();
 
-                    Logger.setContext("Redis").warn(`Disconnected on "${defineValue(signal, "exit")}".`);
+                    Logger.setContext("Redis").warn(
+                        `Disconnected on "${defineValue(signal, "exit")}".`
+                    );
                 } catch (error: any) {
                     Logger.setContext("Redis").error("Error during disconnect.").trace(error);
                 } finally {

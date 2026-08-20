@@ -2,8 +2,8 @@ import type { RedisConfig, RedisPipeline, RedisSubscribe } from "../types/redis"
 export default class RedisBuilder {
     private static clients;
     private static emitter;
-    static setClient(cfg: RedisConfig, name?: string): Record<string, Function>;
-    static connection(name: string): Record<string, Function>;
+    static setClient(cfg: RedisConfig, name?: string): Record<string, (...args: Array<any>) => {}>;
+    static connection(name: string): Record<string, (...args: Array<any>) => {}>;
     static connect(name?: string): Promise<Bun.RedisClient>;
     static disconnect(name?: string): Promise<void>;
     static ping(message?: Bun.RedisClient.KeyLike, connection?: string, disconnectAfter?: boolean): Promise<string | boolean>;

@@ -243,7 +243,9 @@ export default class RedisBuilder {
             Logger.setContext("Redis").info(`Subscribed to "${channel}" channel.`);
         }
         catch (error) {
-            Logger.setContext("Redis").error(`Failed to subscribe "${channel}" channel.`).trace(error);
+            Logger.setContext("Redis")
+                .error(`Failed to subscribe "${channel}" channel.`)
+                .trace(error);
         }
         const unsubscribe = async () => {
             try {
@@ -253,7 +255,9 @@ export default class RedisBuilder {
                 return true;
             }
             catch (error) {
-                Logger.setContext("Redis").error(`Failed to unsubscribe from "${channel}" channel.`).trace(error);
+                Logger.setContext("Redis")
+                    .error(`Failed to unsubscribe from "${channel}" channel.`)
+                    .trace(error);
                 return false;
             }
         };
@@ -389,7 +393,7 @@ export default class RedisBuilder {
         try {
             return JSON.parse(value);
         }
-        catch (error) {
+        catch {
             return value;
         }
     }
