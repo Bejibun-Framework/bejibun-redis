@@ -2,52 +2,62 @@ import type {RedisConfig, RedisPipeline, RedisSubscribe} from "@/types/redis";
 import App from "@bejibun/app";
 import Logger from "@bejibun/logger";
 import {defineValue, isEmpty, isNotEmpty} from "@bejibun/utils";
-import Str from "@bejibun/utils/facades/Str";
 import {EventEmitter} from "events";
 import fs from "fs";
 import RedisConf from "@/config/redis";
 import RedisException from "@/exceptions/RedisException";
 
+/** Provides low-level Redis operations, connection management, pub/sub, and pipelines. */
 export default class RedisBuilder {
     private static clients: Record<string, Bun.RedisClient> = {};
     private static emitter = new EventEmitter();
 
+    /**
+     * Creates and registers a client for the given configuration and returns bound command wrappers.
+     *
+     * @param {RedisConfig} cfg - Redis connection configuration.
+     * @param {string} name - Optional connection name; defaults to the configured default connection.
+     * @returns {Record<string, (...args: Array<any>) => {}>} Map of command names to bound functions.
+     */
     public static setClient(
         cfg: RedisConfig,
         name?: string
     ): Record<string, (...args: Array<any>) => {}> {
-        const connectionName = defineValue(name, Str.random());
+        const connectionName = defineValue(name, RedisBuilder.config.default);
 
         this.clients[connectionName] = this.createClient(connectionName, cfg);
 
         return {
-            decr: (key: Bun.RedisClient.KeyLike) =>
-                this.decr(key, connectionName, isNotEmpty(name)),
+            decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, connectionName, false),
             decrBy: (key: Bun.RedisClient.KeyLike, decrement: number) =>
-                this.decrBy(key, decrement, connectionName, isNotEmpty(name)),
-            del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, isNotEmpty(name)),
-            exists: (key: Bun.RedisClient.KeyLike) =>
-                this.exists(key, connectionName, isNotEmpty(name)),
+                this.decrBy(key, decrement, connectionName, false),
+            del: (key: Bun.RedisClient.KeyLike) => this.del(key, connectionName, false),
+            exists: (key: Bun.RedisClient.KeyLike) => this.exists(key, connectionName, false),
             expire: (key: Bun.RedisClient.KeyLike, value: number) =>
-                this.expire(key, value, connectionName, isNotEmpty(name)),
-            get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, isNotEmpty(name)),
-            incr: (key: Bun.RedisClient.KeyLike) =>
-                this.incr(key, connectionName, isNotEmpty(name)),
+                this.expire(key, value, connectionName, false),
+            get: (key: Bun.RedisClient.KeyLike) => this.get(key, connectionName, false),
+            incr: (key: Bun.RedisClient.KeyLike) => this.incr(key, connectionName, false),
             incrBy: (key: Bun.RedisClient.KeyLike, increment: number) =>
-                this.incrBy(key, increment, connectionName, isNotEmpty(name)),
-            keys: (pattern: string) => this.keys(pattern, connectionName, isNotEmpty(name)),
+                this.incrBy(key, increment, connectionName, false),
+            keys: (pattern: string) => this.keys(pattern, connectionName, false),
             pipeline: (fn: (pipe: RedisPipeline) => void) =>
-                this.pipeline(fn, connectionName, isNotEmpty(name)),
+                this.pipeline(fn, connectionName, false),
             publish: (channel: string, message: any) =>
                 this.publish(channel, message, connectionName),
             set: (key: Bun.RedisClient.KeyLike, value: any, ttl?: number) =>
-                this.set(key, value, ttl, connectionName, isNotEmpty(name)),
+                this.set(key, value, ttl, connectionName, false),
             subscribe: (channel: string, listener: Bun.RedisClient.StringPubSubListener) =>
                 this.subscribe(channel, listener, connectionName),
-            ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, connectionName, isNotEmpty(name))
+            ttl: (key: Bun.RedisClient.KeyLike) => this.ttl(key, connectionName, false)
         };
     }
 
+    /**
+     * Returns command wrappers bound to an existing named connection.
+     *
+     * @param {string} name - Connection name.
+     * @returns {Record<string, (...args: Array<any>) => {}>} Map of command names to bound functions.
+     */
     public static connection(name: string): Record<string, (...args: Array<any>) => {}> {
         return {
             decr: (key: Bun.RedisClient.KeyLike) => this.decr(key, name),
@@ -71,18 +81,29 @@ export default class RedisBuilder {
         };
     }
 
+    /**
+     * Connects the client for the given connection and emits a connect event.
+     *
+     * @param {string} name - Optional connection name; defaults to the configured default.
+     * @returns {Promise<Bun.RedisClient>} The connected Redis client.
+     */
     public static async connect(name?: string): Promise<Bun.RedisClient> {
         const client = this.getClient(name);
         await client.connect();
 
-        Logger.setContext("Redis").info(
-            `Connected manually to "${defineValue(name, "default")}" connection.`
-        );
-        this.emitter.emit("connect", defineValue(name, "default"));
+        const connectionName = RedisBuilder.connectionName(name);
+
+        Logger.setContext("Redis").info(`Connected manually to "${connectionName}" connection.`);
+        this.emitter.emit("connect", connectionName);
 
         return client;
     }
 
+    /**
+     * Closes and unregisters a single named connection, or all connections when no name is given.
+     *
+     * @param {string} name - Optional connection name.
+     */
     public static async disconnect(name?: string): Promise<void> {
         if (isNotEmpty(name)) {
             const client = this.clients[name as string];
@@ -107,10 +128,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Pings the server, returning the response or false on failure.
+     *
+     * @param {Bun.RedisClient.KeyLike} message - Optional message to send with the ping.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<string | boolean>} The ping response, or false when the ping fails.
+     */
     public static async ping(
         message?: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<string | boolean> {
         try {
             const response = await this.getClient(connection).ping(defineValue(message));
@@ -125,10 +154,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Returns all keys matching the given pattern.
+     *
+     * @param {string} pattern - Glob-style key pattern.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<Array<string>>} Array of matching keys, or an empty array on failure.
+     */
     public static async keys(
         pattern: string,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<Array<string>> {
         try {
             const response = await this.getClient(connection).keys(pattern);
@@ -143,10 +180,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Gets and deserializes the value stored at the given key.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to read.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<any>} The deserialized value, or null on failure.
+     */
     public static async get(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<any> {
         try {
             const response = await this.getClient(connection).get(key);
@@ -161,12 +206,22 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Serializes and stores a value at the given key, optionally setting a TTL.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to write.
+     * @param {any} value - Value to store.
+     * @param {number} ttl - Optional time-to-live in seconds.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number | "OK">} The Redis set response, or 0 on failure.
+     */
     public static async set(
         key: Bun.RedisClient.KeyLike,
         value: any,
         ttl?: number,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number | "OK"> {
         try {
             const client = this.getClient(connection);
@@ -186,10 +241,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Deletes the given key.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to delete.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} Number of keys deleted, or 0 on failure.
+     */
     public static async del(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).del(key);
@@ -204,10 +267,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Checks whether the given key exists.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to check.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<boolean>} True when the key exists, false otherwise or on failure.
+     */
     public static async exists(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<boolean> {
         try {
             const data = await this.getClient(connection).exists(key);
@@ -222,10 +293,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Increments the integer stored at the given key by one.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to increment.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} The new value, or 0 on failure.
+     */
     public static async incr(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).incr(key);
@@ -240,10 +319,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Decrements the integer stored at the given key by one.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to decrement.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} The new value, or 0 on failure.
+     */
     public static async decr(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).decr(key);
@@ -258,11 +345,20 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Increments the integer stored at the given key by the given amount.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to increment.
+     * @param {number} increment - Amount to add.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} The new value, or 0 on failure.
+     */
     public static async incrBy(
         key: Bun.RedisClient.KeyLike,
         increment: number,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).incrby(key, increment);
@@ -277,11 +373,20 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Decrements the integer stored at the given key by the given amount.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to decrement.
+     * @param {number} decrement - Amount to subtract.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} The new value, or 0 on failure.
+     */
     public static async decrBy(
         key: Bun.RedisClient.KeyLike,
         decrement: number,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).decrby(key, decrement);
@@ -296,10 +401,18 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Returns the remaining time-to-live in seconds for the given key.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to inspect.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} The remaining TTL, or 0 on failure.
+     */
     public static async ttl(
         key: Bun.RedisClient.KeyLike,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).ttl(key);
@@ -314,11 +427,20 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Sets a time-to-live in seconds on the given key.
+     *
+     * @param {Bun.RedisClient.KeyLike} key - Key to expire.
+     * @param {number} value - Time-to-live in seconds.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<number>} True when the expiry is set, or 0 on failure.
+     */
     public static async expire(
         key: Bun.RedisClient.KeyLike,
         value: number,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ): Promise<number> {
         try {
             const data = await this.getClient(connection).expire(key, value);
@@ -333,6 +455,14 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Publishes a serialized message to a channel.
+     *
+     * @param {string} channel - Channel to publish to.
+     * @param {any} message - Message to publish.
+     * @param {string} connection - Optional connection name.
+     * @returns {Promise<number>} Number of clients that received the message, or 0 on failure.
+     */
     public static async publish(
         channel: string,
         message: any,
@@ -349,6 +479,14 @@ export default class RedisBuilder {
         }
     }
 
+    /**
+     * Subscribes a listener to a channel and returns a handle with an unsubscribe function.
+     *
+     * @param {string} channel - Channel to subscribe to.
+     * @param {Bun.RedisClient.StringPubSubListener} listener - Callback invoked with deserialized messages.
+     * @param {string} connection - Optional connection name.
+     * @returns {Promise<RedisSubscribe>} The subscription client and its unsubscribe function.
+     */
     public static async subscribe(
         channel: string,
         listener: Bun.RedisClient.StringPubSubListener,
@@ -392,10 +530,18 @@ export default class RedisBuilder {
         };
     }
 
+    /**
+     * Runs multiple commands through a pipelined interface and returns the deserialized results.
+     *
+     * @param {Function} fn - Callback that enqueues commands on the pipeline.
+     * @param {string} connection - Optional connection name.
+     * @param {boolean} disconnectAfter - Whether to disconnect after the operation.
+     * @returns {Promise<Array<any>>} Array of deserialized results in command order.
+     */
     public static async pipeline(
         fn: (pipe: RedisPipeline) => void,
         connection?: string,
-        disconnectAfter: boolean = true
+        disconnectAfter: boolean = false
     ) {
         const client = this.getClient(connection);
         const ops: Array<Promise<any>> = [];
@@ -451,6 +597,12 @@ export default class RedisBuilder {
         return results.map((result: any) => this.deserialize(result));
     }
 
+    /**
+     * Registers a listener for a lifecycle event.
+     *
+     * @param {"connect" | "disconnect" | "error"} event - Event name to listen for.
+     * @param {Function} listener - Callback invoked on the event.
+     */
     public static on(
         event: "connect" | "disconnect" | "error",
         listener: (...args: Array<any>) => void
@@ -458,6 +610,12 @@ export default class RedisBuilder {
         this.emitter.on(event, listener);
     }
 
+    /**
+     * Removes a listener for a lifecycle event.
+     *
+     * @param {"connect" | "disconnect" | "error"} event - Event name to stop listening for.
+     * @param {Function} listener - Callback to remove.
+     */
     public static off(
         event: "connect" | "disconnect" | "error",
         listener: (...args: Array<any>) => void
@@ -465,17 +623,32 @@ export default class RedisBuilder {
         this.emitter.off(event, listener);
     }
 
+    /** Lazily loaded Redis config, read from disk exactly once. */
+    private static cachedConfig: Record<string, any>;
+
+    /**
+     * Returns the Redis config, loading it from disk once and reusing the result.
+     *
+     * @returns {Record<string, any>} The resolved Redis config.
+     */
     private static get config(): Record<string, any> {
-        let config: any;
+        if (RedisBuilder.cachedConfig) return RedisBuilder.cachedConfig;
 
         const configPath = App.Path.configPath("redis.ts");
 
-        if (fs.existsSync(configPath)) config = require(configPath).default;
-        else config = RedisConf;
+        RedisBuilder.cachedConfig = fs.existsSync(configPath)
+            ? require(configPath).default
+            : RedisConf;
 
-        return config;
+        return RedisBuilder.cachedConfig;
     }
 
+    /**
+     * Builds a Redis connection URL from the given configuration.
+     *
+     * @param {RedisConfig} cfg - Redis connection configuration.
+     * @returns {string} The constructed Redis URL.
+     */
     private static buildUrl(cfg: RedisConfig): string {
         const url = new URL(`redis://${cfg.host}:${cfg.port}`);
 
@@ -485,6 +658,13 @@ export default class RedisBuilder {
         return url.toString();
     }
 
+    /**
+     * Creates a Redis client for the given connection, wiring up connect and close handlers.
+     *
+     * @param {string} name - Connection name used for logging and events.
+     * @param {RedisConfig} cfg - Redis connection configuration.
+     * @returns {Bun.RedisClient} The new Redis client.
+     */
     private static createClient(name: string, cfg: RedisConfig): Bun.RedisClient {
         const url = this.buildUrl(cfg);
         const client = new Bun.RedisClient(url, this.getOptions(cfg));
@@ -502,6 +682,12 @@ export default class RedisBuilder {
         return client;
     }
 
+    /**
+     * Builds Redis client options from the given configuration.
+     *
+     * @param {RedisConfig} cfg - Redis connection configuration.
+     * @returns {Bun.RedisOptions} The client options.
+     */
     private static getOptions(cfg: RedisConfig): Bun.RedisOptions {
         return {
             autoReconnect: true,
@@ -509,17 +695,18 @@ export default class RedisBuilder {
         };
     }
 
+    /**
+     * Resolves connection configuration for a connection name.
+     *
+     * @param {string} name - Optional connection name.
+     * @returns {RedisConfig} The resolved connection configuration.
+     * @throws {RedisException} When the requested connection is not found.
+     */
     private static getConfig(name?: string): RedisConfig {
-        const connectionName = defineValue(name, this.config.default);
+        const connectionName = RedisBuilder.connectionName(name);
         const connection = defineValue(
-            this.config.connections[connectionName],
-            defineValue(this.config.connections[defineValue(Bun.env.REDIS_CONNECTION, "local")], {
-                host: "127.0.0.1",
-                port: 6379,
-                password: "",
-                database: 0,
-                maxRetries: 10
-            })
+            RedisBuilder.config.connections[connectionName],
+            RedisBuilder.config.connections[defineValue(Bun.env.REDIS_CONNECTION, "local")]
         );
 
         if (isEmpty(connection))
@@ -528,19 +715,41 @@ export default class RedisBuilder {
         return connection;
     }
 
-    private static getClient(name?: string): Bun.RedisClient {
-        const connectionName = defineValue(name, this.config.default);
-
-        this.ensureExitHooks();
-
-        if (isEmpty(this.clients[connectionName])) {
-            const cfg = this.getConfig(connectionName);
-            this.clients[connectionName] = this.createClient(connectionName, cfg);
-        }
-
-        return this.clients[connectionName];
+    /**
+     * Resolves the connection name, defaulting to the configured default.
+     *
+     * @param {string} name - Optional connection name.
+     * @returns {string} The resolved connection name.
+     */
+    private static connectionName(name?: string): string {
+        return defineValue(name, RedisBuilder.config.default);
     }
 
+    /**
+     * Returns the client for a connection name, creating it lazily if needed.
+     *
+     * @param {string} name - Optional connection name.
+     * @returns {Bun.RedisClient} The Redis client for the connection.
+     */
+    private static getClient(name?: string): Bun.RedisClient {
+        const connectionName = RedisBuilder.connectionName(name);
+
+        RedisBuilder.ensureExitHooks();
+
+        if (isEmpty(RedisBuilder.clients[connectionName])) {
+            const cfg = RedisBuilder.getConfig(connectionName);
+            RedisBuilder.clients[connectionName] = RedisBuilder.createClient(connectionName, cfg);
+        }
+
+        return RedisBuilder.clients[connectionName];
+    }
+
+    /**
+     * Serializes a value for storage.
+     *
+     * @param {any} value - Value to serialize.
+     * @returns {string} The serialized string representation.
+     */
     private static serialize(value: any): string {
         if (isEmpty(value)) return "";
         if (typeof value === "object") return JSON.stringify(value);
@@ -549,6 +758,12 @@ export default class RedisBuilder {
         return value;
     }
 
+    /**
+     * Deserializes a stored string back into its original value.
+     *
+     * @param {string} value - Stored string to deserialize.
+     * @returns {any} The parsed value, or null when empty.
+     */
     private static deserialize(value?: string | null): any {
         if (isEmpty(value)) return null;
 
@@ -559,6 +774,7 @@ export default class RedisBuilder {
         }
     }
 
+    /** Registers process exit and signal handlers once to disconnect all clients on shutdown. */
     private static ensureExitHooks = (() => {
         let initialized = false;
 

@@ -3,6 +3,49 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v0.1.48](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.47...v0.1.48) - 2026-09-01
+
+### 🩹 Fixes
+- Fixed the `config` getter re-reading the Redis config file from disk (`App.Path.configPath` + `fs.existsSync` + `require()`) on **every** `RedisBuilder` call
+- Fixed `setClient(cfg)` without a name creating a client under a random connection name that was never reused, leaking an extra connection; it now targets the configured default connection
+
+### 📖 Changes
+#### Performance
+- Added **persistent connection pooling**: `disconnectAfter` now defaults to `false`, so a client is created once and reused across operations instead of being closed and recreated (new connection) on every call; call `Redis.disconnect(name?)` for explicit cleanup
+- `setClient()` named-connection wrappers no longer disconnect after each op, keeping the connection alive for reuse
+- `setClient(cfg)` without a name now registers the configured default connection (no more random name), so subsequent `Redis.get/set` reuse the same client
+- Removed the now-unused `Str` facade import
+- The Redis config is now loaded once (lazy module-level cache) and reused on subsequent calls; connection-name and connection resolution read the cached object instead of hitting the filesystem
+- Extracted `connectionName()` and simplified `getConfig()` fallback so each op resolves the default connection without re-reading config
+- Added `tests` to tsconfig `exclude` so compiled output never lands in `tests/`
+
+### 🧪 Tests
+- Added test suite (11 tests across 1 file) covering config caching, connection-name resolution, `getConfig` fallback, persistent-client reuse / disconnect behavior, and `setClient` default-connection targeting
+
+### ⚡ Benchmarks
+- Added benchmark suite comparing baseline (`@bejibun/redis@0.1.46`) vs optimized build
+- **config resolution throughput: ~110x faster** (0.6ms vs 63.3ms for 20k resolutions, ~34M ops/s)
+- **Redis.set() throughput (live server): ~4.77x faster** (45.2ms vs 215.6ms for 500 calls)
+- **Redis.get() throughput (live server): ~4.66x faster** (43.2ms vs 201.4ms for 500 calls)
+- Cold start: ~1.0x (config is resolved lazily)
+
+### 📦 Dependencies
+
+- Bumped [`@bejibun/app`](https://github.com/Bejibun-Framework/bejibun-app) from `^0.1.25` to `^0.1.26`
+- Bumped [`@bejibun/logger`](https://github.com/Bejibun-Framework/bejibun-logger) from `^0.1.23` to `^0.2.1`
+- Bumped [`@bejibun/utils`](https://github.com/Bejibun-Framework/bejibun-utils) from `^0.1.29` to `^0.1.30`
+- Bumped `@types/bun` (devDependency) from `^1.3.14` to `^1.4.0`
+- Bumped `tsc-alias` (devDependency) from `^1.9.2` to `^1.9.3`
+- Bumped `eslint` (devDependency) from `^10.8.1` to `^10.9.1`
+- Bumped `typescript-eslint` (devDependency) from `^8.67.0` to `^8.69.0`
+
+### ❤️Contributors
+- Havea Crenata ([@crenata](https://github.com/crenata))
+
+**Full Changelog**: https://github.com/Bejibun-Framework/bejibun-redis/blob/master/CHANGELOG.md
+
+---
+
 ## [v0.1.47](https://github.com/Bejibun-Framework/bejibun-redis/compare/v0.1.46...v0.1.47) - 2026-08-20
 
 ### 🩹 Fixes
